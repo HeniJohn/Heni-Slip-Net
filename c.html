@@ -1,0 +1,99 @@
+<!doctype html><html lang="om"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex">
+<title>Import Slipnet Config - Heni Tech</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%2316a34a'/%3E%3Cpath d='M13 3 5 13h6l-1 8 8-10h-6z' fill='%23fff'/%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+*{box-sizing:border-box;margin:0}
+svg.i{width:1em;height:1em;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-.14em;flex:none}
+body{min-height:100vh;font-family:'Space Grotesk',system-ui,sans-serif;color:#f1f5f2;padding:28px 16px 20px;display:flex;flex-direction:column;align-items:center;
+ background:radial-gradient(600px 380px at 50% 0,#0f5a2a55,transparent 70%),linear-gradient(180deg,#020a05,#04170b 50%,#031208)}
+main{width:100%;max-width:440px;flex:1}
+.logo{display:grid;place-items:center;width:92px;height:92px;margin:30px auto 0;border-radius:30px;color:#03140a;font-size:46px;
+ background:linear-gradient(145deg,#6ef08a,#15a34a);box-shadow:0 0 0 7px #5ed35a14,0 14px 54px #16a34a88;transform:rotate(-6deg)}
+.logo svg{fill:currentColor;stroke:none;transform:rotate(6deg)}
+h1{text-align:center;color:#5ed35a;font-size:30px;line-height:1.25;font-weight:700;margin:22px 0 30px;text-transform:uppercase}
+.card{border:1px solid #1f3d2a;border-radius:30px;padding:22px 18px;background:#08150ee6}
+.head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:18px}
+.name{font-size:22px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pill{flex:none;display:flex;align-items:center;gap:8px;padding:9px 16px;border-radius:99px;border:1px solid;font-size:15px;font-weight:700;text-transform:uppercase}
+.pill i{width:10px;height:10px;border-radius:50%;background:currentColor}
+.pill.ok{color:#4ade80;border-color:#4ade80}.pill.bad{color:#e5323f;border-color:#8a1f28}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.tile{border:1px solid #1f3d2a;border-radius:24px;padding:16px;background:#0b1d13}
+.tile small{display:block;color:#9fb3a6;font-size:15px}
+.tile .l{display:flex;align-items:center;gap:8px;text-transform:uppercase;font-size:13px;min-height:36px;line-height:1.25}
+.tile .l svg{font-size:20px;color:#5ed35a}
+.tile b{display:block;font-size:34px;font-weight:700;margin:2px 0 6px;font-variant-numeric:tabular-nums}
+.btn{width:100%;margin-top:18px;padding:21px;border-radius:22px;border:1px solid #7a2630;background:#0d1c13;color:#5a6a60;font:700 20px 'Space Grotesk',sans-serif;display:flex;align-items:center;justify-content:center;gap:10px}
+.btn svg{font-size:24px}
+.btn:not(:disabled){border-color:#4ade80;color:#04170b;background:linear-gradient(135deg,#6ef08a,#16a34a);box-shadow:0 8px 30px #16a34a55;cursor:pointer}
+.btn:not(:disabled):active{transform:scale(.98)}
+.msg{margin-top:12px;text-align:center;font-size:14px;color:#9fb3a6;min-height:18px}.msg.err{color:#ff6b78}
+footer{margin-top:24px;text-align:center;color:#6f8a79;font-size:13px}
+footer a{display:inline-flex;align-items:center;gap:6px;margin-left:6px;color:#5ed35a;text-decoration:none;font-weight:700}
+</style></head><body><main>
+<div class="logo"><svg class="i" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg></div>
+<h1>Heni Tech<br>Slipnet Config</h1>
+<div class="card"><div class="head"><span class="name" id="name">...</span><span class="pill ok" id="pill"><i></i><span id="pt">...</span></span></div>
+<div class="grid">
+<div class="tile"><small class="l"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>Time left</small><b id="time">--:--</b><small id="timeNote">&nbsp;</small></div>
+<div class="tile"><small class="l"><svg class="i" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/></svg>User slots left</small><b id="slots">-</b><small id="slotsNote">&nbsp;</small></div>
+<div class="tile"><small class="l"><svg class="i" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg>Per phone</small><b>1</b><small>import only</small></div>
+<div class="tile"><small class="l"><svg class="i" viewBox="0 0 24 24"><path d="M20 13c0 5-3.5 7.5-7.7 9a1 1 0 0 1-.6 0C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.2-2.7a1.2 1.2 0 0 1 1.6 0C14.5 3.8 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>Status</small><b id="state" style="font-size:30px">-</b><small id="stateNote">&nbsp;</small></div></div>
+<button class="btn" id="btn" disabled>Loading...</button><p class="msg" id="msg"></p></div></main>
+<footer>Developed by Heni John <a href="https://t.me/Heni_Tech24" target="_blank" rel="noopener"><svg class="i" viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4zM22 2 11 13"/></svg>@Heni_Tech24</a></footer>
+<script>
+const $=id=>document.getElementById(id),token=location.pathname.split('/').pop();
+const tg=window.Telegram&&Telegram.WebApp,initData=tg?tg.initData:'';
+const IC={
+ dl:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5M12 15V3"/>',
+ lock:'<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+ ok:'<path d="M22 11.1V12a10 10 0 1 1-5.9-9.1"/><path d="m22 4-10 10-3-3"/>',
+ users:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/>',
+ tg:'<path d="m22 2-7 20-4-9-9-4zM22 2 11 13"/>',
+ x:'<circle cx="12" cy="12" r="10"/><path d="m15 9-6 6M9 9l6 6"/>'};
+const ic=n=>'<svg class="i" viewBox="0 0 24 24">'+IC[n]+'</svg>';
+let cfg,off=0,done=false,busy=false;
+const hex=b=>[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('');
+async function deviceId(){
+  let id=localStorage.getItem('ht_id')||(document.cookie.match(/ht_id=([\w-]+)/)||[])[1];
+  if(!id)id=crypto.randomUUID();
+  try{localStorage.setItem('ht_id',id)}catch(e){}
+  document.cookie='ht_id='+id+';max-age=63072000;path=/;SameSite=Lax;Secure';
+  let gl='';try{const g=document.createElement('canvas').getContext('webgl'),e=g.getExtension('WEBGL_debug_renderer_info');gl=g.getParameter(e.UNMASKED_RENDERER_WEBGL)}catch(e){}
+  const fp=[navigator.userAgent,screen.width+'x'+screen.height,screen.colorDepth,navigator.hardwareConcurrency,navigator.language,Intl.DateTimeFormat().resolvedOptions().timeZone,gl].join('|');
+  return hex(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(id+'|'+fp)));
+}
+const p2=n=>String(n).padStart(2,'0');
+function fmt(ms){if(ms<=0)return'00:00';const s=Math.floor(ms/1000),d=Math.floor(s/86400),h=Math.floor(s%86400/3600),m=Math.floor(s%3600/60);return d?d+'d '+p2(h)+':'+p2(m):h?p2(h)+':'+p2(m)+':'+p2(s%60):p2(m)+':'+p2(s%60)}
+function render(){
+  if(!cfg)return;
+  const left=cfg.expiresAt-(Date.now()+off),slots=Math.max(cfg.maxSlots-cfg.used,0);
+  const expired=left<=0,full=slots<=0,needTg=cfg.requireTelegram&&!initData;
+  const st=done?['Imported','ok']:expired?['Expired','bad']:full?['Full','bad']:['Active','ok'];
+  $('name').textContent=cfg.name;$('pt').textContent=st[0];$('pill').className='pill '+st[1];
+  $('time').textContent=fmt(left);$('timeNote').textContent=expired?'ended':'remaining';
+  $('slots').textContent=slots;$('slotsNote').textContent='of '+cfg.maxSlots;
+  $('state').textContent=st[0];$('stateNote').textContent=st[1]==='ok'?'enabled':'disabled';
+  const b=$('btn');b.disabled=done||expired||full||needTg||busy;
+  b.innerHTML=done?ic('ok')+'Imported':expired?ic('lock')+'Config Expired':full?ic('users')+'Slots Full':needTg?ic('tg')+'Open inside Telegram':ic('dl')+'Import to SlipNet';
+}
+async function load(){
+  const r=await fetch('/api/config?token='+encodeURIComponent(token));
+  if(!r.ok){$('name').textContent='Link not found';$('pt').textContent='Invalid';$('pill').className='pill bad';$('btn').innerHTML=ic('x')+'Invalid link';return}
+  cfg=await r.json();off=cfg.now-Date.now();render();
+}
+const ERR={expired:'Config expired.',full:'All slots are taken.',already:'This phone already imported this config.',need_telegram:'Open this link inside Telegram.',not_found:'Link not found.'};
+$('btn').onclick=async()=>{
+  busy=true;render();$('msg').className='msg';$('msg').textContent='Checking...';
+  try{
+    const r=await fetch('/api/import',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({token,deviceId:await deviceId(),initData})});
+    const j=await r.json();
+    if(!r.ok)throw new Error(ERR[j.error]||'Server error. Try again.');
+    done=true;$('msg').textContent='Opening SlipNet...';location.href=j.uri;
+  }catch(e){$('msg').className='msg err';$('msg').textContent=e.message}
+  busy=false;await load();
+};
+load();setInterval(render,1000);setInterval(load,20000);
+</script></body></html>

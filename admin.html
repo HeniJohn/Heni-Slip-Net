@@ -1,0 +1,26 @@
+<!doctype html><html lang="om"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@700;800&family=Manrope:wght@500;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="/style.css"><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%2316a34a'/%3E%3Cpath d='M13 3 5 13h6l-1 8 8-10h-6z' fill='%23fff'/%3E%3C/svg%3E"><title>Admin - Heni Tech</title></head><body><main class="wrap">
+<div class="logo"><svg viewBox="0 0 24 24" style="width:42px;height:42px;fill:#03140a"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg></div><h1>Admin</h1><p class="sub">Config haaraa uumi</p>
+<div class="card" id="login"><label>Password<input id="pw" type="password" autocomplete="current-password"></label><button class="btn" id="go">Seeni</button><p class="msg err" id="lerr"></p></div>
+<div id="panel" hidden><div class="card">
+<label>Maqaa<input id="n" placeholder="Maqaa config"></label>
+<label>slipnet:// link<input id="u" placeholder="slipnet://..."></label>
+<label>Yeroo (sa'aatii)<input id="h" type="number" value="24" min="1"></label>
+<label>Baay'ina slot<input id="m" type="number" value="100" min="1"></label>
+<label style="display:flex;gap:8px;align-items:center"><input id="t" type="checkbox" style="width:auto;margin:0"> Telegram Mini App qofa (device ID cimaa)</label>
+<button class="btn" id="mk">Link uumi</button><p class="msg" id="out"></p></div>
+<div id="list"></div></div></main><footer>Developed by <b>Heni John</b><br><a class="tg" href="https://t.me/Heni_Tech24" target="_blank" rel="noopener">Telegram: @Heni_Tech24</a></footer>
+<script>
+const $=id=>document.getElementById(id);let pw=sessionStorage.getItem('pw')||'';
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+async function api(b){const r=await fetch('/api/admin',{method:'POST',headers:{'content-type':'application/json','x-admin-password':pw},body:JSON.stringify(b)});
+  if(r.status===401)throw new Error('Password dogoggora');const j=await r.json();if(!r.ok)throw new Error(j.error);return j}
+async function list(){const j=await api({action:'list'});$('login').hidden=true;$('panel').hidden=false;
+  $('list').innerHTML=j.items.map(i=>'<div class="row"><div><b>'+esc(i.name)+'</b><br>'+i.used+'/'+i.maxSlots+' · '+(i.expiresAt>Date.now()?'active':'expired')+'</div><button data-c="'+i.token+'">Copy</button><button data-d="'+i.token+'">Delete</button></div>').join('')}
+$('go').onclick=async()=>{pw=$('pw').value;try{await list();sessionStorage.setItem('pw',pw)}catch(e){$('lerr').textContent=e.message}};
+$('mk').onclick=async()=>{try{const j=await api({action:'create',name:$('n').value,uri:$('u').value,hours:$('h').value,maxSlots:$('m').value,requireTelegram:$('t').checked});
+  const link=location.origin+'/c/'+j.token;$('out').textContent=link;navigator.clipboard&&navigator.clipboard.writeText(link);$('u').value='';await list()}catch(e){$('out').textContent=e.message}};
+$('list').onclick=async e=>{const c=e.target.dataset.c,d=e.target.dataset.d;
+  if(c)navigator.clipboard.writeText(location.origin+'/c/'+c);
+  if(d&&confirm('Haquu?')){await api({action:'delete',token:d});list()}};
+if(pw)list().catch(()=>{});
+</script></body></html>
