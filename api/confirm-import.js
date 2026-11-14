@@ -1,31 +1,34 @@
-const { redis, KEYS, getConfig, missingEnv } = require("./_lib");
+const { redis, K, redisMissing, resolveId, getCfg, getBody } = require("./_lib");
 
 module.exports = async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store");
   if (req.method !== "POST") return res.status(405).json({ error: "method" });
 
   try {
-    const miss = missingEnv();
+    const miss = redisMissing();
     if (miss.length) return res.status(500).json({ error: "env", missing: miss });
 
-    const body = typeof req.body === "string" ? JSON.parse(req.body || "{}") : (req.body || {});
+    const body = getBody(req);
     const deviceId = String(body.deviceId || "");
     if (deviceId.length < 8) return res.status(400).json({ error: "device" });
 
-    const cfg = await getConfig();
+    const id = await resolveId(body.c);
+    const cfg = await getCfg(id);
+    if (!cfg) return res.status(404).json({ error: "nocfg" });
     if (Date.now() > cfg.expiresAt) return res.status(410).json({ error: "expired" });
 
-    // 1) Device kun duraan import godheera? Yoo eeyyee slot hin xiqqaatu.
-    const added = await redis.sadd(KEYS.devices, deviceId);
+    // 1) Device kun config kanaaf duraan import godheera? Yoo eeyyee slot hin xiqqaatu.
+    const added = await redis.sadd(K.dev(id), deviceId);
     if (added === 0) {
-      return res.status(200).json({ imported: true, slotsLeft: cfg.slotsLeft, already: true });
+      const used0 = Number((await redis.get(K.used(id))) || 0);
+      return res.status(200).json({ imported: true, already: true, slotsLeft: Math.max(0, cfg.total - used0) });
     }
 
     // 2) Slot haaraa fudhadhu (atomic INCR)
-    const used = await redis.incr(KEYS.used);
+    const used = await redis.incr(K.used(id));
     if (used > cfg.total) {
-      await redis.decr(KEYS.used);
-      await redis.srem(KEYS.devices, deviceId);
+      await redis.decr(K.used(id));
+      await redis.srem(K.dev(id), deviceId);
       return res.status(409).json({ error: "full", slotsLeft: 0 });
     }
 
