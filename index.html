@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="om">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Heni Tech SlipNet Config</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #04120a;
+    --card: #0a1a12;
+    --tile: #0d2017;
+    --line: #1c3a2a;
+    --green: #4ade80;
+    --green-deep: #16a34a;
+    --text: #eef6f1;
+    --muted: #8fa89a;
+    --danger: #7f2a33;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    width: 100%;
+    overflow-x: hidden;          /* gar tokkotti siree hin jiru */
+  }
+
+  body {
+    min-height: 100vh;
+    min-height: 100dvh;
+    font-family: "Space Grotesk", system-ui, -apple-system, "Segoe UI", sans-serif;
+    color: var(--text);
+    background: radial-gradient(120% 60% at 50% 0%, #0b3a20 0%, var(--bg) 60%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;           /* walakkaatti */
+    padding: 28px 16px calc(24px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .page {
+    width: 100%;
+    max-width: 420px;              /* card hundi dheerina wal-qixa */
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 22px;
+  }
+
+  .logo {
+    width: 76px;
+    height: 76px;
+    border-radius: 22px;
+    background: linear-gradient(145deg, #6ee79a, var(--green-deep));
+    display: grid;
+    place-items: center;
+    box-shadow: 0 0 40px rgba(74, 222, 128, .35);
+  }
+  .logo svg { width: 38px; height: 38px; fill: #052e16; }
+
+  h1 {
+    text-align: center;
+    color: var(--green);
+    font-size: clamp(1.7rem, 8vw, 2.2rem);
+    line-height: 1.12;
+    font-weight: 700;
+    letter-spacing: .01em;
+  }
+
+  .card {
+    width: 100%;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 28px;
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    min-width: 0;
+  }
+  .card-head h2 {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .badge {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border: 1.5px solid var(--green);
+    border-radius: 999px;
+    color: var(--green);
+    font-size: .85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+  .badge::before {
+    content: "";
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    background: var(--green);
+  }
+
+  /* 2x2 grid: kolonii lamaan guutummaatti wal-qixa */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .tile {
+    min-width: 0;
+    background: var(--tile);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 6px;
+    min-height: 118px;
+  }
+  .tile .label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--muted);
+    font-size: .78rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    line-height: 1.2;
+  }
+  .tile .label svg {
+    flex: 0 0 auto;
+    width: 20px; height: 20px;
+    stroke: var(--green); fill: none; stroke-width: 2;
+    stroke-linecap: round; stroke-linejoin: round;
+  }
+  .tile .value {
+    font-size: clamp(1.35rem, 6.4vw, 1.8rem);
+    font-weight: 700;
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  .tile .sub {
+    color: var(--muted);
+    font-size: .9rem;
+  }
+
+  .btn {
+    width: 100%;
+    min-height: 56px;
+    border: 0;
+    border-radius: 18px;
+    font: inherit;
+    font-size: 1.05rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    text-decoration: none;
+    cursor: pointer;
+    background: linear-gradient(135deg, #6ee79a, var(--green-deep));
+    color: #052e16;
+    box-shadow: 0 8px 28px rgba(74, 222, 128, .25);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .btn:active { transform: scale(.985); }
+  .btn svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+  .btn.done {
+    background: transparent;
+    color: var(--muted);
+    border: 1.5px solid var(--danger);
+    box-shadow: none;
+    pointer-events: none;
+  }
+
+  .btn.ghost {
+    min-height: 48px;
+    background: transparent;
+    color: var(--green);
+    border: 1.5px solid var(--line);
+    box-shadow: none;
+    font-size: .95rem;
+  }
+
+  .hint {
+    text-align: center;
+    color: var(--muted);
+    font-size: .9rem;
+    min-height: 1.2em;
+  }
+
+  footer {
+    margin-top: auto;
+    padding-top: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px 12px;
+    color: var(--muted);
+    font-size: .9rem;
+    text-align: center;
+  }
+  footer a {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--green);
+    font-weight: 600;
+    text-decoration: none;
+  }
+  footer svg { width: 18px; height: 18px; stroke: var(--green); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+  [hidden] { display: none !important; }
+  .hint:empty { display: none; }
+
+  :focus-visible { outline: 2px solid var(--green); outline-offset: 3px; }
+</style>
+</head>
+<body>
+
+<main class="page">
+  <div class="logo" aria-hidden="true">
+    <svg viewBox="0 0 24 24"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg>
+  </div>
+
+  <h1>HENI TECH<br>SLIPNET CONFIG</h1>
+
+  <section class="card">
+    <div class="card-head">
+      <h2 id="name">...</h2>
+      <span class="badge" id="badge">Active</span>
+    </div>
+
+    <div class="grid">
+      <div class="tile">
+        <div class="label">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+          Time left
+        </div>
+        <div class="value" id="time">00:00:00</div>
+        <div class="sub">remaining</div>
+      </div>
+
+      <div class="tile">
+        <div class="label">
+          <svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M21.5 20c0-2.8-1.6-4.8-4-5.6"/></svg>
+          User slots left
+        </div>
+        <div class="value" id="slots">1</div>
+        <div class="sub" id="slotsOf">of 1</div>
+      </div>
+
+      <div class="tile">
+        <div class="label">
+          <svg viewBox="0 0 24 24"><rect x="6.5" y="2.5" width="11" height="19" rx="2.5"/><path d="M11 18.5h2"/></svg>
+          Per phone
+        </div>
+        <div class="value">1</div>
+        <div class="sub">import only</div>
+      </div>
+
+      <div class="tile">
+        <div class="label">
+          <svg viewBox="0 0 24 24"><path d="M12 2.5 4.5 5.5v6c0 4.6 3.2 8.4 7.5 10 4.3-1.6 7.5-5.4 7.5-10v-6z"/><path d="m8.8 12 2.3 2.3 4.2-4.6"/></svg>
+          Status
+        </div>
+        <div class="value" id="status">Active</div>
+        <div class="sub">enabled</div>
+      </div>
+    </div>
+
+    <a class="btn" id="importBtn" href="#">
+      <svg viewBox="0 0 24 24"><path d="M12 3v12m0 0-4-4m4 4 4-4M4 20h16"/></svg>
+      <span id="btnText">Import to SlipNet</span>
+    </a>
+    <p class="hint" id="hint"></p>
+  </section>
+
+  <footer>
+    <span>Developed by Heni John</span>
+    <a href="https://t.me/Heni_Tech24" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24"><path d="M21.5 3 2.5 10.5l6 2.2 2.2 6.3 3.3-4.2 5 3.7z"/><path d="m8.5 12.7 13-9.7"/></svg>
+      @Heni_Tech24
+    </a>
+  </footer>
+</main>
+
+<script>
+  const API_STATUS  = "/api/status";
+  const API_CLAIM   = "/api/claim";
+  const API_CONFIRM = "/api/confirm-import";
+  const CONFIG_ID = new URLSearchParams(location.search).get("c") || "";   // ?c=xxxx
+
+  const state = {
+    id: "", name: "", expiresAt: Date.now(),
+    slotsLeft: 0, slotsTotal: 0,
+    imported: false, canImport: false, missing: false
+  };
+  let nonce = "";
+
+  const $ = id => document.getElementById(id);
+  const pad = n => String(n).padStart(2, "0");
+
+  function deviceId() {
+    try {
+      let id = localStorage.getItem("deviceId");
+      if (!id) {
+        id = (crypto.randomUUID && crypto.randomUUID()) || (String(Date.now()) + Math.random());
+        localStorage.setItem("deviceId", id);
+      }
+      return id;
+    } catch { return "unknown-device"; }
+  }
+
+  function render() {
+    $("name").textContent = state.missing ? "Config hin jiru" : (state.name || "...");
+    $("slots").textContent = state.slotsLeft;
+    $("slotsOf").textContent = "of " + state.slotsTotal;
+
+    const label = state.missing ? "Unavailable" : state.imported ? "Imported" : "Active";
+    $("badge").textContent = label;
+    $("status").textContent = label;
+
+    const btn = $("importBtn");
+    const unavailable = !state.imported && !state.canImport;
+    btn.classList.toggle("done", state.imported || unavailable);
+    $("btnText").textContent = state.imported ? "Imported" : unavailable ? "Not available" : "Import to SlipNet";
+    btn.setAttribute("href", "#");   // link HTML keessa hin jiru
+  }
+
+  function tick() {
+    let s = Math.max(0, Math.floor((state.expiresAt - Date.now()) / 1000));
+    const h = Math.floor(s / 3600);
+    const m = Math.floor((s % 3600) / 60);
+    s = s % 60;
+    $("time").textContent = h > 0 ? `${pad(h)}:${pad(m)}:${pad(s)}` : `${pad(m)}:${pad(s)}`;
+  }
+
+  /* Slot kan xiqqaatu SERVER import mirkaneesse BOODA qofa */
+  let committing = false;
+  async function commitImport() {
+    if (state.imported || committing || !state.id || !nonce) return;
+    committing = true;
+    try {
+      const res = await fetch(API_CONFIRM, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ c: state.id, deviceId: deviceId(), nonce }),
+        keepalive: true
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.status === 409) { state.slotsLeft = 0; state.canImport = false; $("hint").textContent = "Slot hundi dhumeera."; render(); return; }
+      if (res.status === 410) { state.canImport = false; $("hint").textContent = "Yeroon config kanaa darbeera."; render(); return; }
+      if (!res.ok) throw new Error("server");
+
+      state.slotsLeft = data.slotsLeft;
+      state.imported = true;
+      nonce = "";
+      $("hint").textContent = "";
+      render();
+    } catch {
+      $("hint").textContent = "Server quunnamuu hin dandeenye. Slot hin xiqqaanne.";
+    } finally {
+      committing = false;
+    }
+  }
+
+  /* App banamuu isaa erga arganne qofa mirkaneessina */
+  let waiting = false;
+  const appOpened = () => { if (waiting) { waiting = false; commitImport(); } };
+  document.addEventListener("visibilitychange", () => { if (document.hidden) appOpened(); });
+  window.addEventListener("pagehide", appOpened);
+  window.addEventListener("blur", appOpened);
+
+  /* Link tuqaa booda qofa server irraa fudhatama, kan mul'u hin jiru */
+  let busy = false;
+  $("importBtn").addEventListener("click", async e => {
+    e.preventDefault();
+    if (busy || state.imported || !state.canImport) return;
+    busy = true;
+    $("hint").textContent = "Opening SlipNet...";
+    try {
+      const res = await fetch(API_CLAIM, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ c: state.id, deviceId: deviceId() })
+      });
+      const d = await res.json().catch(() => ({}));
+
+      if (res.status === 409) { state.canImport = false; $("hint").textContent = "Slot dhumeera ykn duraan import goote."; render(); return; }
+      if (res.status === 410) { state.canImport = false; $("hint").textContent = "Yeroon config kanaa darbeera."; render(); return; }
+      if (res.status === 429) { $("hint").textContent = "Yaalii baay'ee. Booda yaali."; return; }
+      if (!res.ok || !d.link) throw new Error("server");
+
+      nonce = d.nonce;
+      waiting = true;
+      setTimeout(() => {
+        if (!waiting) return;            // app banameera
+        waiting = false;                 // app hin banamne: slot hin xiqqaatu
+        $("hint").textContent = "SlipNet hin banamne. SlipNet app sirrii install godhii irra deebi'ii tuqi.";
+      }, 2500);
+      location.href = d.link;
+    } catch {
+      $("hint").textContent = "Server quunnamuu hin dandeenye. Irra deebi'ii yaali.";
+    } finally {
+      busy = false;
+    }
+  });
+
+  async function init() {
+    try {
+      const url = API_STATUS + "?c=" + encodeURIComponent(CONFIG_ID) + "&deviceId=" + encodeURIComponent(deviceId());
+      const res = await fetch(url, { cache: "no-store" });
+      const data = await res.json();
+      if (res.status === 404) state.missing = true;
+      else if (!res.ok) $("hint").textContent = "Server dogoggora qaba. Booda yaali.";
+      else Object.assign(state, data);
+    } catch {
+      $("hint").textContent = "Server quunnamuu hin dandeenye.";
+    }
+    render();
+    tick();
+    setInterval(tick, 1000);
+  }
+  init();
+</script>
+</body>
+</html>
