@@ -249,7 +249,7 @@
 
   <section class="card">
     <div class="card-head">
-      <h2 id="name">Heni SlipNet</h2>
+      <h2 id="name">...</h2>
       <span class="badge" id="badge">Active</span>
     </div>
 
@@ -312,23 +312,25 @@
 
 <script>
   /* ====== SETTINGS ====== */
-  const USE_API = true;                       // false = demo qofa (server tokko malee)
   const API_STATUS  = "/api/status";
   const API_CONFIRM = "/api/confirm-import";
+  const CONFIG_ID = new URLSearchParams(location.search).get("c") || "";   // ?c=xxxx
 
   const state = {
-    name: "Heni SlipNet",
+    id: "",
+    name: "",
     link: "",
-    expiresAt: Date.now() + 24 * 3600 * 1000,
-    slotsLeft: 100,
-    slotsTotal: 100,
-    imported: false
+    expiresAt: Date.now(),
+    slotsLeft: 0,
+    slotsTotal: 0,
+    imported: false,
+    missing: false
   };
 
   const $ = id => document.getElementById(id);
   const pad = n => String(n).padStart(2, "0");
 
-  /* Device ID: phone tokkoon yeroo 1 qofa import */
+  /* Device ID: phone tokkoon config tokkoof yeroo 1 qofa import */
   function deviceId() {
     try {
       let id = localStorage.getItem("deviceId");
@@ -341,11 +343,11 @@
   }
 
   function render() {
-    $("name").textContent = state.name;
+    $("name").textContent = state.missing ? "Config hin jiru" : (state.name || "...");
     $("slots").textContent = state.slotsLeft;
     $("slotsOf").textContent = "of " + state.slotsTotal;
 
-    const label = state.imported ? "Imported" : "Active";
+    const label = state.missing ? "Unavailable" : state.imported ? "Imported" : "Active";
     $("badge").textContent = label;
     $("status").textContent = label;
 
@@ -367,38 +369,33 @@
   /* Slot kan xiqqaatu SERVER import mirkaneesse BOODA qofa */
   let committing = false;
   async function commitImport() {
-    if (state.imported || committing) return;
+    if (state.imported || committing || !state.id) return;
     committing = true;
     try {
-      if (USE_API) {
-        const res = await fetch(API_CONFIRM, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ deviceId: deviceId() }),
-          keepalive: true
-        });
-        const data = await res.json().catch(() => ({}));
+      const res = await fetch(API_CONFIRM, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ c: state.id, deviceId: deviceId() }),
+        keepalive: true
+      });
+      const data = await res.json().catch(() => ({}));
 
-        if (res.status === 409) {
-          $("hint").textContent = "Slot hundi dhumeera.";
-          state.slotsLeft = 0; state.link = "";
-          render();
-          return;
-        }
-        if (res.status === 410) {
-          $("hint").textContent = "Yeroon config kanaa darbeera.";
-          state.link = "";
-          render();
-          return;
-        }
-        if (!res.ok) throw new Error("server");
-
-        state.slotsLeft = data.slotsLeft;
-        state.imported = true;
-      } else {
-        state.slotsLeft = Math.max(0, state.slotsLeft - 1);   // demo
-        state.imported = true;
+      if (res.status === 409) {
+        $("hint").textContent = "Slot hundi dhumeera.";
+        state.slotsLeft = 0; state.link = "";
+        render();
+        return;
       }
+      if (res.status === 410) {
+        $("hint").textContent = "Yeroon config kanaa darbeera.";
+        state.link = "";
+        render();
+        return;
+      }
+      if (!res.ok) throw new Error("server");
+
+      state.slotsLeft = data.slotsLeft;
+      state.imported = true;
       $("hint").textContent = "";
       $("copyBtn").hidden = true;
       $("confirmBtn").hidden = true;
@@ -425,7 +422,7 @@
 
     setTimeout(() => {
       if (!waiting) return;               // app banameera, slot lakkaa'ameera
-      waiting = false;                    // app hin banamne: slot hin xiqqaatu (100 as turu)
+      waiting = false;                    // app hin banamne: slot hin xiqqaatu
       $("hint").textContent = "SlipNet hin banamne. Config kopii godhi, SlipNet keessatti paste godhi, itti aansuun \"Import ani goolee\" tuqi.";
       $("copyBtn").hidden = false;
       $("confirmBtn").hidden = false;
@@ -444,15 +441,15 @@
   $("confirmBtn").addEventListener("click", commitImport);
 
   async function init() {
-    if (USE_API) {
-      try {
-        const res = await fetch(API_STATUS + "?deviceId=" + encodeURIComponent(deviceId()), { cache: "no-store" });
-        Object.assign(state, await res.json());
-      } catch {
-        $("hint").textContent = "Server quunnamuu hin dandeenye.";
-      }
-    } else {
-      state.link = "slipnet-bundle-enc://PASTE_YOUR_CONFIG_HERE";
+    try {
+      const url = API_STATUS + "?c=" + encodeURIComponent(CONFIG_ID) + "&deviceId=" + encodeURIComponent(deviceId());
+      const res = await fetch(url, { cache: "no-store" });
+      const data = await res.json();
+      if (res.status === 404) { state.missing = true; }
+      else if (!res.ok) { $("hint").textContent = "Server dogoggora qaba. Booda yaali."; }
+      else Object.assign(state, data);
+    } catch {
+      $("hint").textContent = "Server quunnamuu hin dandeenye.";
     }
     render();
     tick();

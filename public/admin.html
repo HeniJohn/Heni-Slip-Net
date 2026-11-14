@@ -1,26 +1,286 @@
-<!doctype html><html lang="om"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@700;800&family=Manrope:wght@500;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="/style.css"><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%2316a34a'/%3E%3Cpath d='M13 3 5 13h6l-1 8 8-10h-6z' fill='%23fff'/%3E%3C/svg%3E"><title>Admin - Heni Tech</title></head><body><main class="wrap">
-<div class="logo"><svg viewBox="0 0 24 24" style="width:42px;height:42px;fill:#03140a"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg></div><h1>Admin</h1><p class="sub">Config haaraa uumi</p>
-<div class="card" id="login"><label>Password<input id="pw" type="password" autocomplete="current-password"></label><button class="btn" id="go">Seeni</button><p class="msg err" id="lerr"></p></div>
-<div id="panel" hidden><div class="card">
-<label>Maqaa<input id="n" placeholder="Maqaa config"></label>
-<label>slipnet:// link<input id="u" placeholder="slipnet://..."></label>
-<label>Yeroo (sa'aatii)<input id="h" type="number" value="24" min="1"></label>
-<label>Baay'ina slot<input id="m" type="number" value="100" min="1"></label>
-<label style="display:flex;gap:8px;align-items:center"><input id="t" type="checkbox" style="width:auto;margin:0"> Telegram Mini App qofa (device ID cimaa)</label>
-<button class="btn" id="mk">Link uumi</button><p class="msg" id="out"></p></div>
-<div id="list"></div></div></main><footer>Developed by <b>Heni John</b><br><a class="tg" href="https://t.me/Heni_Tech24" target="_blank" rel="noopener">Telegram: @Heni_Tech24</a></footer>
+<!DOCTYPE html>
+<html lang="om">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Admin | Heni SlipNet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #04120a; --card: #0a1a12; --tile: #0d2017; --line: #1c3a2a;
+    --green: #4ade80; --green-deep: #16a34a; --text: #eef6f1; --muted: #8fa89a;
+    --danger: #ff5d6c;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 100%; overflow-x: hidden; }
+  body {
+    min-height: 100dvh;
+    font-family: "Space Grotesk", system-ui, -apple-system, "Segoe UI", sans-serif;
+    color: var(--text);
+    background: radial-gradient(120% 60% at 50% 0%, #0b3a20 0%, var(--bg) 60%);
+    display: flex; flex-direction: column; align-items: center;
+    padding: 28px 16px calc(24px + env(safe-area-inset-bottom, 0px));
+  }
+  [hidden] { display: none !important; }
+  .page { width: 100%; max-width: 460px; display: flex; flex-direction: column; align-items: center; gap: 18px; }
+  .logo { width: 76px; height: 76px; border-radius: 22px; background: linear-gradient(145deg,#6ee79a,var(--green-deep)); display: grid; place-items: center; box-shadow: 0 0 40px rgba(74,222,128,.35); }
+  .logo svg { width: 38px; height: 38px; fill: #052e16; }
+  h1 { font-size: clamp(2.2rem, 11vw, 3rem); font-weight: 700; color: #a8f5c4; line-height: 1; }
+  .sub { color: var(--muted); font-size: 1.05rem; text-align: center; }
+
+  .card { width: 100%; background: var(--card); border: 1px solid var(--line); border-radius: 28px; padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+  label { display: flex; flex-direction: column; gap: 8px; color: var(--muted); font-size: .95rem; }
+  input, textarea {
+    width: 100%; font: inherit; font-size: 1rem; color: var(--text);
+    background: #050f09; border: 1px solid var(--line); border-radius: 16px; padding: 14px 16px; outline: none;
+  }
+  textarea { min-height: 110px; resize: vertical; word-break: break-all; }
+  input:focus, textarea:focus { border-color: var(--green); }
+  .row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+
+  .btn {
+    width: 100%; min-height: 54px; border: 0; border-radius: 18px; font: inherit; font-size: 1.05rem; font-weight: 700;
+    display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer;
+    background: linear-gradient(135deg,#6ee79a,var(--green-deep)); color: #052e16;
+    box-shadow: 0 8px 28px rgba(74,222,128,.25); -webkit-tap-highlight-color: transparent;
+  }
+  .btn:active { transform: scale(.985); }
+  .btn:disabled { opacity: .6; }
+  .btn.ghost { background: transparent; color: var(--green); border: 1.5px solid var(--line); box-shadow: none; min-height: 44px; font-size: .95rem; }
+  .btn.danger { background: transparent; color: var(--danger); border: 1.5px solid #5a2630; box-shadow: none; min-height: 44px; font-size: .95rem; }
+  .msg { text-align: center; font-size: .95rem; min-height: 1.2em; }
+  .msg:empty { display: none; }
+  .msg.err { color: var(--danger); }
+  .msg.ok { color: var(--green); }
+
+  h2 { font-size: 1.2rem; font-weight: 700; }
+  .created { background: var(--tile); border: 1px solid var(--green); border-radius: 18px; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+  .created code { word-break: break-all; color: var(--green); font-size: .95rem; }
+
+  .item { background: var(--tile); border: 1px solid var(--line); border-radius: 20px; padding: 14px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+  .item .top { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+  .item .name { font-weight: 700; font-size: 1.1rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+  .item .meta { color: var(--muted); font-size: .9rem; display: flex; flex-wrap: wrap; gap: 6px 14px; }
+  .item .meta b { color: var(--text); font-variant-numeric: tabular-nums; }
+  .bar { height: 8px; border-radius: 99px; background: #07150d; overflow: hidden; }
+  .bar > i { display: block; height: 100%; background: linear-gradient(90deg,#6ee79a,var(--green-deep)); }
+  .actions { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; }
+  .empty { color: var(--muted); text-align: center; padding: 8px 0; }
+  .out { align-self: flex-end; background: none; border: 0; color: var(--muted); font: inherit; font-size: .9rem; cursor: pointer; }
+  footer { margin-top: auto; padding-top: 28px; color: var(--muted); font-size: .95rem; text-align: center; }
+  footer b { color: var(--text); }
+  :focus-visible { outline: 2px solid var(--green); outline-offset: 3px; }
+</style>
+</head>
+<body>
+<main class="page">
+  <div class="logo" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg></div>
+  <h1>Admin</h1>
+  <p class="sub" id="sub">Config haaraa uumi</p>
+
+  <!-- Password jalqabaa kaa'uu (al tokko) -->
+  <section class="card" id="vSetup" hidden>
+    <label>Password haaraa kaa'i (6+ qubee)
+      <input id="setPw" type="password" autocomplete="new-password">
+    </label>
+    <label>Irra deebi'ii barreessi
+      <input id="setPw2" type="password" autocomplete="new-password">
+    </label>
+    <button class="btn" id="setBtn" type="button">Password kaa'i</button>
+    <p class="msg" id="setMsg"></p>
+  </section>
+
+  <!-- Seenuu -->
+  <section class="card" id="vLogin" hidden>
+    <label>Password
+      <input id="pw" type="password" autocomplete="current-password">
+    </label>
+    <button class="btn" id="loginBtn" type="button">Seeni</button>
+    <p class="msg" id="loginMsg"></p>
+  </section>
+
+  <!-- Paanela -->
+  <section class="card" id="vPanel" hidden>
+    <button class="out" id="outBtn" type="button">Ba'i</button>
+    <h2>Config haaraa</h2>
+    <label>Maqaa
+      <input id="cName" type="text" maxlength="60" placeholder="Heni SlipNet">
+    </label>
+    <label>Config link
+      <textarea id="cLink" placeholder="slipnet-bundle-enc://..." spellcheck="false" autocapitalize="off" autocomplete="off"></textarea>
+    </label>
+    <div class="row">
+      <label>Slot
+        <input id="cTotal" type="number" inputmode="numeric" min="1" value="100">
+      </label>
+      <label>Yeroo (sa'aatii)
+        <input id="cHours" type="number" inputmode="decimal" min="1" value="24">
+      </label>
+    </div>
+    <button class="btn" id="createBtn" type="button">Config uumi</button>
+    <p class="msg" id="createMsg"></p>
+
+    <div class="created" id="created" hidden>
+      <span>Config uumameera. Link kana namaaf ergi:</span>
+      <code id="createdUrl"></code>
+      <button class="btn ghost" id="copyNew" type="button">Link copy godhi</button>
+    </div>
+  </section>
+
+  <section class="card" id="vList" hidden>
+    <h2>Config kee</h2>
+    <div id="list"></div>
+  </section>
+</main>
+
+<footer>Developed by <b>Heni John</b></footer>
+
 <script>
-const $=id=>document.getElementById(id);let pw=sessionStorage.getItem('pw')||'';
-const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-async function api(b){const r=await fetch('/api/admin',{method:'POST',headers:{'content-type':'application/json','x-admin-password':pw},body:JSON.stringify(b)});
-  if(r.status===401)throw new Error('Password dogoggora');const j=await r.json();if(!r.ok)throw new Error(j.error);return j}
-async function list(){const j=await api({action:'list'});$('login').hidden=true;$('panel').hidden=false;
-  $('list').innerHTML=j.items.map(i=>'<div class="row"><div><b>'+esc(i.name)+'</b><br>'+i.used+'/'+i.maxSlots+' · '+(i.expiresAt>Date.now()?'active':'expired')+'</div><button data-c="'+i.token+'">Copy</button><button data-d="'+i.token+'">Delete</button></div>').join('')}
-$('go').onclick=async()=>{pw=$('pw').value;try{await list();sessionStorage.setItem('pw',pw)}catch(e){$('lerr').textContent=e.message}};
-$('mk').onclick=async()=>{try{const j=await api({action:'create',name:$('n').value,uri:$('u').value,hours:$('h').value,maxSlots:$('m').value,requireTelegram:$('t').checked});
-  const link=location.origin+'/c/'+j.token;$('out').textContent=link;navigator.clipboard&&navigator.clipboard.writeText(link);$('u').value='';await list()}catch(e){$('out').textContent=e.message}};
-$('list').onclick=async e=>{const c=e.target.dataset.c,d=e.target.dataset.d;
-  if(c)navigator.clipboard.writeText(location.origin+'/c/'+c);
-  if(d&&confirm('Haquu?')){await api({action:'delete',token:d});list()}};
-if(pw)list().catch(()=>{});
-</script></body></html>
+  const $ = id => document.getElementById(id);
+  let PW = "";
+
+  async function api(body) {
+    try {
+      const r = await fetch("/api/admin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(Object.assign({ password: PW }, body))
+      });
+      let d;
+      try { d = await r.json(); } catch { d = { error: "server", message: "Server dogoggora deebise (" + r.status + ")" }; }
+      d._status = r.status;
+      return d;
+    } catch {
+      return { error: "net", message: "Interneetiin hin jiru, irra deebi'ii yaali." };
+    }
+  }
+
+  function show(which) {
+    ["vSetup", "vLogin", "vPanel", "vList"].forEach(v => { $(v).hidden = true; });
+    which.forEach(v => { $(v).hidden = false; });
+  }
+  function say(el, text, kind) { el.textContent = text || ""; el.className = "msg" + (kind ? " " + kind : ""); }
+
+  async function init() {
+    const d = await api({ action: "status" });
+    if (d.error) { show(["vLogin"]); say($("loginMsg"), d.message || "Server dogoggora", "err"); return; }
+    if (d.setup) { $("sub").textContent = "Password jalqabaa kaa'i"; show(["vSetup"]); }
+    else show(["vLogin"]);
+  }
+
+  $("setBtn").addEventListener("click", async () => {
+    const a = $("setPw").value, b = $("setPw2").value;
+    if (a.length < 6) return say($("setMsg"), "Password xiqqaate 6 qubee.", "err");
+    if (a !== b) return say($("setMsg"), "Password lamaan wal-hin fakkaatan.", "err");
+    $("setBtn").disabled = true;
+    const d = await api({ action: "setup", password: a });
+    $("setBtn").disabled = false;
+    if (!d.ok) return say($("setMsg"), d.message || "Dogoggora", "err");
+    PW = a; enter();
+  });
+
+  $("loginBtn").addEventListener("click", login);
+  $("pw").addEventListener("keydown", e => { if (e.key === "Enter") login(); });
+  async function login() {
+    const pw = $("pw").value;
+    if (!pw) return;
+    PW = pw;
+    $("loginBtn").disabled = true;
+    const d = await api({ action: "login" });
+    $("loginBtn").disabled = false;
+    if (!d.ok) { PW = ""; return say($("loginMsg"), d.message || "Dogoggora", "err"); }
+    enter();
+  }
+
+  async function enter() {
+    $("sub").textContent = "Config haaraa uumi";
+    $("pw").value = ""; $("setPw").value = ""; $("setPw2").value = "";
+    show(["vPanel", "vList"]);
+    refresh();
+  }
+
+  $("outBtn").addEventListener("click", () => { PW = ""; $("created").hidden = true; show(["vLogin"]); });
+
+  $("createBtn").addEventListener("click", async () => {
+    $("created").hidden = true;
+    $("createBtn").disabled = true;
+    say($("createMsg"), "Uumaa jira...");
+    const d = await api({
+      action: "create",
+      name: $("cName").value,
+      link: $("cLink").value,
+      total: $("cTotal").value,
+      hours: $("cHours").value
+    });
+    $("createBtn").disabled = false;
+    if (!d.ok) return say($("createMsg"), d.message || "Dogoggora", "err");
+    say($("createMsg"), "");
+    $("createdUrl").textContent = d.url;
+    $("created").hidden = false;
+    $("cName").value = ""; $("cLink").value = "";
+    refresh();
+  });
+
+  async function copy(text, btn) {
+    const old = btn.textContent;
+    try { await navigator.clipboard.writeText(text); btn.textContent = "Copy ta'eera"; }
+    catch { btn.textContent = "Copy hin danda'amne"; }
+    setTimeout(() => { btn.textContent = old; }, 1500);
+  }
+  $("copyNew").addEventListener("click", e => copy($("createdUrl").textContent, e.currentTarget));
+
+  function left(ms) {
+    if (ms <= 0) return "xumurameera";
+    const s = Math.floor(ms / 1000), h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60);
+    return h >= 24 ? Math.floor(h / 24) + "d " + (h % 24) + "h" : h + "h " + m + "m";
+  }
+
+  async function refresh() {
+    const d = await api({ action: "list" });
+    const box = $("list");
+    box.replaceChildren();
+    if (!d.items) { const p = document.createElement("p"); p.className = "empty"; p.textContent = d.message || "Dogoggora"; box.append(p); return; }
+    if (!d.items.length) { const p = document.createElement("p"); p.className = "empty"; p.textContent = "Config hin jiru. Armaan olitti uumi."; box.append(p); return; }
+
+    const wrap = document.createElement("div");
+    wrap.style.cssText = "display:flex;flex-direction:column;gap:12px";
+    d.items.forEach(it => {
+      const el = document.createElement("div"); el.className = "item";
+      const top = document.createElement("div"); top.className = "top";
+      const name = document.createElement("span"); name.className = "name"; name.textContent = it.name;
+      const cnt = document.createElement("b"); cnt.textContent = (it.total - it.used) + " / " + it.total;
+      top.append(name, cnt);
+
+      const bar = document.createElement("div"); bar.className = "bar";
+      const fill = document.createElement("i"); fill.style.width = Math.min(100, Math.round(it.used / it.total * 100)) + "%";
+      bar.append(fill);
+
+      const meta = document.createElement("div"); meta.className = "meta";
+      const m1 = document.createElement("span"); m1.append("Import: "); const b1 = document.createElement("b"); b1.textContent = it.used; m1.append(b1);
+      const m2 = document.createElement("span"); m2.append("Yeroo: "); const b2 = document.createElement("b"); b2.textContent = left(it.expiresAt - Date.now()); m2.append(b2);
+      meta.append(m1, m2);
+
+      const act = document.createElement("div"); act.className = "actions";
+      const c = document.createElement("button"); c.className = "btn ghost"; c.type = "button"; c.textContent = "Link copy";
+      c.addEventListener("click", () => copy(it.url, c));
+      const del = document.createElement("button"); del.className = "btn danger"; del.type = "button"; del.textContent = "Haqi";
+      del.addEventListener("click", async () => {
+        if (!confirm("\"" + it.name + "\" haquu mirkaneessi?")) return;
+        await api({ action: "delete", id: it.id });
+        refresh();
+      });
+      act.append(c, del);
+
+      el.append(top, bar, meta, act);
+      wrap.append(el);
+    });
+    box.append(wrap);
+  }
+
+  init();
+</script>
+</body>
+</html>
