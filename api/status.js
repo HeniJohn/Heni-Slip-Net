@@ -1,9 +1,12 @@
-import { redis, KEYS, getConfig } from "./_lib.js";
+const { redis, KEYS, getConfig, missingEnv } = require("./_lib");
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store");
   try {
-    const deviceId = String(req.query.deviceId || "");
+    const miss = missingEnv();
+    if (miss.length) return res.status(500).json({ error: "env", missing: miss });
+
+    const deviceId = String((req.query && req.query.deviceId) || "");
     const cfg = await getConfig();
 
     const imported = deviceId
@@ -23,6 +26,7 @@ export default async function handler(req, res) {
       link: canImport ? process.env.CONFIG_LINK : ""
     });
   } catch (e) {
-    res.status(500).json({ error: "server" });
+    console.error(e);
+    res.status(500).json({ error: "server", message: String(e && e.message) });
   }
-}
+};
