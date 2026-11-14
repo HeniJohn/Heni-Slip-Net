@@ -13,7 +13,9 @@ const K = {
   ids: "slipnet:ids",                   // config hundaa (sorted set)
   latest: "slipnet:latest",             // config dhumaa
   pw: "slipnet:admin:pw",               // admin password (hash)
-  fail: ip => `slipnet:fail:${ip}`      // yaalii password dogoggoraa
+  fail: ip => `slipnet:fail:${ip}`,     // yaalii password dogoggoraa
+  claim: (id, dev) => `slipnet:claim:${id}:${dev}`, // nonce (link fudhate)
+  rate: (name, ip) => `slipnet:rate:${name}:${ip}`
 };
 
 function redisMissing() {
@@ -89,7 +91,17 @@ async function addFail(ip) {
 }
 const clearFail = ip => redis.del(K.fail(ip));
 
+async function rateLimited(name, ip, max, ttl) {
+  const k = K.rate(name, ip);
+  const n = await redis.incr(k);
+  if (n === 1) await redis.expire(k, ttl);
+  return n > max;
+}
+
+const cleanDevice = d => String(d || "").slice(0, 100);
+
 module.exports = {
+  rateLimited, cleanDevice,
   redis, K, redisMissing, parseJson, cleanId, resolveId, getCfg, getBody, getIp,
   passwordIsSet, setPassword, checkPassword, tooManyFails, addFail, clearFail
 };

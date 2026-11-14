@@ -25,8 +25,8 @@ module.exports = async function handler(req, res) {
       slotsLeft,
       slotsTotal: cfg.total,
       imported,
-      // Link kennamu yoo slot jiraate, yeroon hin darbin fi user kun hin import godhin qofa
-      link: canImport ? cfg.link : ""
+      // Link asitti HIN kennamu. /api/claim irraa tuqaa booda qofa.
+      canImport
     });
   } catch (e) {
     console.error(e);
