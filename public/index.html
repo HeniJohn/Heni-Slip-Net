@@ -295,9 +295,6 @@
       <svg viewBox="0 0 24 24"><path d="M12 3v12m0 0-4-4m4 4 4-4M4 20h16"/></svg>
       <span id="btnText">Import to SlipNet</span>
     </a>
-
-    <button class="btn ghost" id="copyBtn" type="button" hidden>Copy config</button>
-    <button class="btn ghost" id="confirmBtn" type="button" hidden>Import ani goolee</button>
     <p class="hint" id="hint"></p>
   </section>
 
@@ -311,26 +308,21 @@
 </main>
 
 <script>
-  /* ====== SETTINGS ====== */
   const API_STATUS  = "/api/status";
+  const API_CLAIM   = "/api/claim";
   const API_CONFIRM = "/api/confirm-import";
   const CONFIG_ID = new URLSearchParams(location.search).get("c") || "";   // ?c=xxxx
 
   const state = {
-    id: "",
-    name: "",
-    link: "",
-    expiresAt: Date.now(),
-    slotsLeft: 0,
-    slotsTotal: 0,
-    imported: false,
-    missing: false
+    id: "", name: "", expiresAt: Date.now(),
+    slotsLeft: 0, slotsTotal: 0,
+    imported: false, canImport: false, missing: false
   };
+  let nonce = "";
 
   const $ = id => document.getElementById(id);
   const pad = n => String(n).padStart(2, "0");
 
-  /* Device ID: phone tokkoon config tokkoof yeroo 1 qofa import */
   function deviceId() {
     try {
       let id = localStorage.getItem("deviceId");
@@ -352,10 +344,10 @@
     $("status").textContent = label;
 
     const btn = $("importBtn");
-    const unavailable = !state.imported && !state.link;
+    const unavailable = !state.imported && !state.canImport;
     btn.classList.toggle("done", state.imported || unavailable);
     $("btnText").textContent = state.imported ? "Imported" : unavailable ? "Not available" : "Import to SlipNet";
-    btn.setAttribute("href", (state.imported || unavailable) ? "#" : state.link);
+    btn.setAttribute("href", "#");   // link HTML keessa hin jiru
   }
 
   function tick() {
@@ -369,39 +361,27 @@
   /* Slot kan xiqqaatu SERVER import mirkaneesse BOODA qofa */
   let committing = false;
   async function commitImport() {
-    if (state.imported || committing || !state.id) return;
+    if (state.imported || committing || !state.id || !nonce) return;
     committing = true;
     try {
       const res = await fetch(API_CONFIRM, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ c: state.id, deviceId: deviceId() }),
+        body: JSON.stringify({ c: state.id, deviceId: deviceId(), nonce }),
         keepalive: true
       });
       const data = await res.json().catch(() => ({}));
-
-      if (res.status === 409) {
-        $("hint").textContent = "Slot hundi dhumeera.";
-        state.slotsLeft = 0; state.link = "";
-        render();
-        return;
-      }
-      if (res.status === 410) {
-        $("hint").textContent = "Yeroon config kanaa darbeera.";
-        state.link = "";
-        render();
-        return;
-      }
+      if (res.status === 409) { state.slotsLeft = 0; state.canImport = false; $("hint").textContent = "Slot hundi dhumeera."; render(); return; }
+      if (res.status === 410) { state.canImport = false; $("hint").textContent = "Yeroon config kanaa darbeera."; render(); return; }
       if (!res.ok) throw new Error("server");
 
       state.slotsLeft = data.slotsLeft;
       state.imported = true;
+      nonce = "";
       $("hint").textContent = "";
-      $("copyBtn").hidden = true;
-      $("confirmBtn").hidden = true;
       render();
     } catch {
-      $("hint").textContent = "Server quunnamuu hin dandeenye. Slot hin xiqqaanne, irra deebi'ii yaali.";
+      $("hint").textContent = "Server quunnamuu hin dandeenye. Slot hin xiqqaanne.";
     } finally {
       committing = false;
     }
@@ -410,43 +390,52 @@
   /* App banamuu isaa erga arganne qofa mirkaneessina */
   let waiting = false;
   const appOpened = () => { if (waiting) { waiting = false; commitImport(); } };
-
   document.addEventListener("visibilitychange", () => { if (document.hidden) appOpened(); });
   window.addEventListener("pagehide", appOpened);
   window.addEventListener("blur", appOpened);
 
-  $("importBtn").addEventListener("click", e => {
-    if (state.imported || !state.link) { e.preventDefault(); return; }
-    waiting = true;
+  /* Link tuqaa booda qofa server irraa fudhatama, kan mul'u hin jiru */
+  let busy = false;
+  $("importBtn").addEventListener("click", async e => {
+    e.preventDefault();
+    if (busy || state.imported || !state.canImport) return;
+    busy = true;
     $("hint").textContent = "Opening SlipNet...";
-
-    setTimeout(() => {
-      if (!waiting) return;               // app banameera, slot lakkaa'ameera
-      waiting = false;                    // app hin banamne: slot hin xiqqaatu
-      $("hint").textContent = "SlipNet hin banamne. Config kopii godhi, SlipNet keessatti paste godhi, itti aansuun \"Import ani goolee\" tuqi.";
-      $("copyBtn").hidden = false;
-      $("confirmBtn").hidden = false;
-    }, 2500);
-  });
-
-  $("copyBtn").addEventListener("click", async () => {
     try {
-      await navigator.clipboard.writeText(state.link);
-      $("hint").textContent = "Config copy ta'eera. SlipNet keessatti paste godhi.";
+      const res = await fetch(API_CLAIM, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ c: state.id, deviceId: deviceId() })
+      });
+      const d = await res.json().catch(() => ({}));
+
+      if (res.status === 409) { state.canImport = false; $("hint").textContent = "Slot dhumeera ykn duraan import goote."; render(); return; }
+      if (res.status === 410) { state.canImport = false; $("hint").textContent = "Yeroon config kanaa darbeera."; render(); return; }
+      if (res.status === 429) { $("hint").textContent = "Yaalii baay'ee. Booda yaali."; return; }
+      if (!res.ok || !d.link) throw new Error("server");
+
+      nonce = d.nonce;
+      waiting = true;
+      setTimeout(() => {
+        if (!waiting) return;            // app banameera
+        waiting = false;                 // app hin banamne: slot hin xiqqaatu
+        $("hint").textContent = "SlipNet hin banamne. SlipNet app sirrii install godhii irra deebi'ii tuqi.";
+      }, 2500);
+      location.href = d.link;
     } catch {
-      $("hint").textContent = "Copy hin danda'amne.";
+      $("hint").textContent = "Server quunnamuu hin dandeenye. Irra deebi'ii yaali.";
+    } finally {
+      busy = false;
     }
   });
-
-  $("confirmBtn").addEventListener("click", commitImport);
 
   async function init() {
     try {
       const url = API_STATUS + "?c=" + encodeURIComponent(CONFIG_ID) + "&deviceId=" + encodeURIComponent(deviceId());
       const res = await fetch(url, { cache: "no-store" });
       const data = await res.json();
-      if (res.status === 404) { state.missing = true; }
-      else if (!res.ok) { $("hint").textContent = "Server dogoggora qaba. Booda yaali."; }
+      if (res.status === 404) state.missing = true;
+      else if (!res.ok) $("hint").textContent = "Server dogoggora qaba. Booda yaali.";
       else Object.assign(state, data);
     } catch {
       $("hint").textContent = "Server quunnamuu hin dandeenye.";
